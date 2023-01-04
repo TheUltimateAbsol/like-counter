@@ -12,11 +12,17 @@
 <body>
     <h2 style="font-size:3vw;">Total Likes:</h2>
     <h1 style="font-size:9vw; text-align: right;">
-        6396
+		6396
+        <span id="likes-difference" style="font-size:5vw;">
+			0
+        </span>
     </h1>
     <h2 style="font-size:2.5vw;">Followers:</h2>
     <h1 style="font-size:4vw; text-align: right;">
 		234
+        <span id="followers-difference" style="font-size:3vw;">
+			0
+        </span>
     </h1>
     <p style="font-size:2vw; text-align: right;">(updated every 15 minutes)</p>
     <div style="max-width: 1200px; margin: auto">
@@ -25,5 +31,24 @@
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
 </body>
+
+<script>
+    function changecolor(id){
+        number = parseInt(document.getElementById(id).innerText)
+        if (number > 0){
+            document.getElementById(id).style.color = "green"
+            document.getElementById(id).innerHTML = "(+" + number + ")"
+        }
+        else if (number == 0)
+            document.getElementById(id).innerHTML = ""
+        else{
+            document.getElementById(id).style.color = "red"
+            document.getElementById(id).innerHTML = "(" + number + ")"
+        }
+    }
+
+    changecolor("likes-difference")
+    changecolor("followers-difference")
+</script>
 
 </html>
