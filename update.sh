@@ -1,7 +1,7 @@
 declare -i LIKES
 declare -i VIEWS
-read -r LIKES VIEWS < <(python get-tweets.py $1)
-declare -i FOLLOWERS=$(python get-followers.py)
+read -r LIKES VIEWS < <($2 get-tweets.py $1)
+declare -i FOLLOWERS=$($2 get-followers.py)
 declare -i OLD_LIKES=$(tail -n 1 likes.txt | xargs echo -n)
 declare -i OLD_FOLLOWERS=$(tail -n 1 followers.txt | xargs echo -n)
 declare -i OLD_VIEWS=$(tail -n 1 views.txt | xargs echo -n)
