@@ -1,3 +1,5 @@
+export TWITTER_BEARER_TOKEN=$3
+export USER_ID=$4
 declare -i LIKES
 declare -i VIEWS
 read -r LIKES VIEWS < <($2 get-tweets.py $1)
