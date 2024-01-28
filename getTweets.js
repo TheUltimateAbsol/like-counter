@@ -1,25 +1,25 @@
-import { Rettiwt } from "rettiwt-api";
+import { Rettiwt, Tweet, TweetFilter } from "rettiwt-api";
+import {writeFileSync, readFileSync} from 'fs';
+
+var likeData = JSON.parse(readFileSync('./like_data.json'))
+var viewData = JSON.parse(readFileSync('./view_data.json'))
+
 
 const API_KEY=process.env.API_KEY
 const rettiwt = new Rettiwt({ apiKey: API_KEY});
+
+
+function saveToDisk(newLikes, newViews){
+	likeData = Object.assign(likeData, newLikes)
+	viewData = Object.assign(viewData, newViews)
+	writeFileSync('like_data.json', JSON.stringify(likeData));
+	writeFileSync('view_data.json', JSON.stringify(viewData));
+}
 
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-/**
- * Fetching the list of tweets that:
- * 	- are made by a user with username <username>,
- * 	- contain the words <word1> and <word2>
- */
-// Fetching the details of the user whose username is <username>
-// rettiwt.user.details('1140826190091116544')
-// .then(details => {
-// 	console.log(details)
-// })
-// .catch(error => {
-//     console.error("error fetching details")
-// })
 
 async function getTweets(num){
 	let tweets = []
@@ -29,7 +29,6 @@ async function getTweets(num){
 	while (found < num){
 		try {
 			const result = await rettiwt.tweet.search({ fromUsers: ['alkalinedd'] }, 20, token)
-			console.error("Success pulling data")
 			for (let i = 0; i < result.list.length && found < num; i++){
 				tweets.push(result.list[i])
 				found++
@@ -40,13 +39,10 @@ async function getTweets(num){
 
 			await delay(1000) // avoid api rate limit throttle
 			timeout = 0
-			console.error(found, "tweets found")
 		} 
 		catch (error) {
-			console.error("error fetching details")
-			console.log(error)
 			// Back out if api rate limit is a failure
-			if (timeout > 600)
+			if (timeout > 900)
 				break
 			// If temporarily throttled, wait
 			if (error.response && error.response.status == 429){
@@ -56,7 +52,6 @@ async function getTweets(num){
 			}
 			// Otherwise exit
 			else {
-				console.error(error)
 				break
 			}
 		}
@@ -66,4 +61,19 @@ async function getTweets(num){
 
 
 // Gets user tweets that are not replies and do not contain media
-console.log(await getTweets(100))
+const target = parseInt(process.argv[2])
+let tweets = await getTweets(target)
+const newLikes = tweets.reduce(
+	(accumulator, currentValue) => Object.assign(accumulator, {[currentValue.id] : currentValue.likeCount}),
+	{},
+  );
+const newViews = tweets.reduce(
+	(accumulator, currentValue) => Object.assign(accumulator, {[currentValue.id] : currentValue.viewCount == null ? 0 : currentValue.viewCount }),
+
+	{},
+  );
+saveToDisk(newLikes, newViews)
+let like_sum = Object.values(likeData).reduce((a, b) => a + b, 0)
+let view_sum = Object.values(viewData).reduce((a, b) => a + b, 0)
+console.log(like_sum, view_sum)
+
